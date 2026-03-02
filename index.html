@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Rastrea y Encuentra</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        #mapa {
+            width: 100%;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="mapa"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script>
+        const configuracionFirebase = {
+            apiKey: "AIzaSyBdlL7Qb6Z2r_k26zUm4lR_4s2Ep5ZS438",
+            authDomain: "mapboxmar.firebaseapp.com",
+            databaseURL: "https://mapboxmar-default-rtdb.firebaseio.com",
+            projectId: "mapboxmar",
+            storageBucket: "mapboxmar.firebasestorage.app",
+            messagingSenderId: "603576254643",
+            appId: "1:603576254643:web:REEMPLAZAR_POR_APP_WEB_ID"
+        };
+        firebase.initializeApp(configuracionFirebase);
+        const baseDeDatos = firebase.database();
+        var mapa = L.map('mapa').setView([-16.5, -68.15], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(mapa);
+        window.marcadorActual = null;
+        baseDeDatos.ref("ubicaciones/mi_celular").on("value", function(snapshot) {
+            var ubicacion = snapshot.val();
+            if (ubicacion) {
+                var latitud = ubicacion.latitud;
+                var longitud = ubicacion.longitud;
+                var titulo = ubicacion.titulo || "Mi Celular";
+                if (window.marcadorActual) {
+                    mapa.removeLayer(window.marcadorActual);
+                }
+                window.marcadorActual = L.marker([latitud, longitud])
+                    .addTo(mapa)
+                    .bindPopup(titulo);
+
+                mapa.setView([latitud, longitud], 17);
+            }
+        });
+    </script>
+</body>
+</html>
